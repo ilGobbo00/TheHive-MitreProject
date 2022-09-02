@@ -1,0 +1,7 @@
+MitrettpDB~=1.0.1
+mysql~=0.0.3
+mysql-connector-python~=8.0.28
+PyYAML~=6.0
+typing~=3.7.4.3
+treelib~=1.6.1
+setuptools~=58.1.0
