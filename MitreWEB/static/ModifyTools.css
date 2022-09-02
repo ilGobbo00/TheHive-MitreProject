@@ -1,0 +1,60 @@
+#remove_tools{
+    margin-top: 20px;
+}
+
+table, tr, td, th{
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 5px;
+}
+
+th{
+    text-align: center;
+}
+
+td{
+    padding: 2px 15px;
+}
+
+.warning{
+    color: #c5a800;
+    border: 1px solid #ffde03;
+    background-color: rgba(255, 222, 3, 0.07);
+    padding: 10px;
+    text-align: center;
+}
+
+.error{
+    color: red;
+    border: 1px solid red;
+    background-color: lightpink;
+    width: available;
+    margin: 10px;
+    padding: 10px;
+    text-align: center;
+}
+
+input {
+    font-size: large;
+    height: auto;
+}
+
+input.control {
+    font-size: large;
+    margin: 10px 5px 10px 0;
+    height: auto;
+    padding: 1px 6px;
+}
+
+input[type=text], input[type=number]{
+    height: auto;
+    margin: 2px 5px 2px 0;
+    padding: 1px 2px;
+    font-size: large;
+}
+
+.tab input {
+    float: none;
+    padding: 10px;
+    width: -webkit-fill-available;
+}

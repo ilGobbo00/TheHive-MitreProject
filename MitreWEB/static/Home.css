@@ -1,0 +1,107 @@
+@media (min-width: 1500px) and (min-height: 1010px){
+    #duplicate_warnings {
+        margin-top: -3.6%;
+    }
+
+    .title{
+        padding: 20px;
+    }
+}
+
+@media (max-width: 15001px) and (max-height: 1010px) {
+    .log_errors {
+        white-space: pre-line;
+        margin: 30px 0 0;
+        font-size: small;
+    }
+
+    .title{
+        padding: 10px;
+    }
+}
+
+#duplicate_warnings {
+    margin-top: -100px;
+}
+
+p.message_no_errors {
+    text-align: center;
+    padding: 10px;
+    color: rgb(16 191 40);
+    border: 1px solid rgb(16 191 40);
+    background-color: rgb(173 255 47 / 0.41);
+}
+
+p.message_with_errors {
+    text-align: center;
+    padding: 10px;
+    color: #9b880b;
+    border: 1px solid rgb(255, 222, 3);
+    background-color: rgba(255 222 3 / 0.1);
+}
+
+.log_errors {
+    white-space: pre-line;
+    margin: 30px 0 0;
+}
+
+input {
+    height: 22%;
+    width: 15%;
+    font-size: 19px;
+}
+
+/* Style for title and tab div */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    text-align: center;
+
+}
+
+.tab input {
+    background-color: inherit;
+    border: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+.tab input:hover {
+  background-color: #ddd;
+}
+
+div.title{
+    text-align: center;
+    color: white;
+    background-color: #c63f1f;
+}
+
+h2{
+     margin: 0;
+}
+
+div#pleaseWait{
+    text-align: center;
+    display: none;
+    padding: 10px;
+    color: #c63f1fb8;
+    border: 1px solid #c63f1f;
+    background-color: rgb(198 63 31 / 5%);
+    margin-top: 20px;
+}
+
+div#error {
+    color: red;
+    border: 1px solid red;
+    background-color: rgba(255, 182, 193, 0.56);
+    width: available;
+    margin: 10px 0 0 0;
+    padding: 10px;
+    text-align: center;
+}
+
+div.tab input#goHomeError{
+    width: -webkit-fill-available;
+}

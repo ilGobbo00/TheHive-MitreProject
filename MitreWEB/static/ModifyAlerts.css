@@ -1,0 +1,169 @@
+@media (min-width: 1500px) and (min-height: 1010px){
+    table{
+        font-size: larger;
+        white-space: normal;
+    }
+
+    th{
+        white-space: inherit;
+        background-color: rgba(103, 103, 103, 0.11);
+    }
+
+    input{
+        font-size: large;
+    }
+}
+
+h2{
+    padding: 20px;
+}
+
+button#goHome {
+    margin-top: 0;
+    margin-bottom: 0;
+    border:none;
+    padding: 10px;
+    font-size: large;
+    height: auto;
+    width: -webkit-fill-available;
+}
+
+
+div#add_alert {
+    margin-top: 15px;
+}
+
+div#add_alert input{
+    margin: 5px 5px 0 0;
+}
+
+div#all_alerts{
+    margin-top: 20px;
+}
+
+table, tr, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+table{
+    width: -webkit-fill-available;
+}
+
+input{
+    font-size: medium;
+}
+
+input[type=number] {
+    width: 100px;
+}
+
+input[type=number].tool {
+    width: 140px;
+}
+
+input[type=number]#new_alert_miss_num {
+    width: 210px;
+}
+
+
+td.description input{
+    width: -webkit-fill-available;
+}
+
+td, input{
+    white-space: normal;
+}
+
+/*td.change_tool{*/
+/*    width: 250px;*/
+/*}*/
+
+td{
+    height: 1px;
+}
+
+td label{
+    display: block;
+    min-height: 95%;
+    min-width: 70%;
+    max-width: 100%;
+}
+
+table input{
+    float: left;
+}
+
+.tool_data{
+    width: 130px;
+}
+
+.miss_num_data{
+    width: 150px;
+    text-align: center;
+}
+
+/* Style for title and tab div */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    text-align: center;
+
+}
+
+.tab button {
+    background-color: inherit;
+    border: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+
+.tab button:hover {
+  background-color: #ddd;
+}
+
+
+div.title{
+    text-align: center;
+    color: white;
+    background-color: #c63f1f;
+}
+
+h2{
+     margin: 0;
+}
+
+.warning{
+    margin-top: 10px;
+    color: #c5a800;
+    border: 1px solid #ffde03;
+    background-color: rgba(255, 222, 3, 0.07);
+    padding: 10px;
+    text-align: center;
+}
+
+div.error{
+    text-align: center;
+    padding: 10px;
+    color: #c63f1fb8;
+    border: 1px solid #c63f1f;
+    background-color: rgb(198 63 31 / 5%);
+    margin-top: 20px;
+}
+
+input.searchbar[type="text"]::placeholder{
+    text-align: center;
+}
+
+input.searchbar[type="text"]{
+    float: none;
+}
+
+th{
+    padding: 5px;
+}
