@@ -1,5 +1,5 @@
 # TheHive-MitreProject
-Project developped during an internship experience in the SOC division of Yarix Srl, a cybersecurity company.<br>
+Project developed during an internship experience in the SOC division of Yarix Srl, a cybersecurity company.<br>
 In this company [The Hive Project](https://thehive-project.org/) is used to manage all security events created by the monitoring systems installed in the clients networks. In the main page of this open source platform there are thousands of cases which cointain a single dangerous event that needs to be check by a security technician. Every case contains a specific page where it's possible to insert a TTP (Tactics, Techniques and Procedures) related to [Mitre ATT&CK framework](https://attack.mitre.org/) 
 
 ## Goals
