@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='MitreCategories.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Home.css') }}">
+    <script src="{{ url_for('static', filename='WebGUIScripts.js') }}"></script>
+
+
+    <script>
+        function showDiv(id) {
+            if (document.getElementById(id).style.display === "none") {
+                document.getElementById(id).style.display = "block"
+            } else {
+                document.getElementById(id).style.display = "none"
+            }
+        }
+
+        function display_preview(id) {
+            if (document.getElementById(id).style.display == 'block') {
+                document.getElementById(id).style.display = 'none'
+            } else {
+                elems = document.querySelectorAll('div.div_preview')
+                elems.forEach(function (e) {
+                    e.style.display = 'none'
+                })
+                document.getElementById(id).style.display = 'block'
+            }
+        }
+
+        function loadPage(iframe_class, link){
+            document.querySelector('iframe.' + iframe_class).src = link;
+        }
+
+    </script>
+    <title>{{ title }}</title>
+</head>
+<body>
+
+<div class="title">
+    <h2>{{ title }}</h2>
+</div>
+
+<div class="tab">
+{#    Categorie da visualizzare:#}
+    <form action="/" method="post" id="goHome">
+        <input type="submit" id="goHome" value="HOME">
+    </form>
+
+    <form action="/ExistingCategories" method="POST">
+        <input type="submit" id="tactics" name="visualization" value="Tactics" class="tablinks">
+        <input type="submit" id="techniques" name="visualization" value="Techniques" class="tablinks">
+        <input type="submit" id="sub_techniques" name="visualization" value="Sub-Techniques" class="tablinks">
+        <input type="submit" id="all_categories" name="visualization" value="All Categories" class="tablinks">
+    </form>
+</div>
+
+{% if last_choise == -1 %}
+    <div id="error">
+        Select almost a category
+    </div>
+{% endif %}
+
+{% if showRes or showTot %}
+    <div id="goUp"><a href="#">&#8593;</a></div>
+{% endif %}
+{# Page to display a specific type of Mitre's category #}
+{% if showRes %}
+    <div id="partial_table">
+        <table>
+            <tbody>
+            <tr>
+                <td>ID</td>
+                <td>Nome</td>
+                <td>Link</td>
+            </tr>
+            {% for m in mitre_element %}
+                {% if CONROL_VARIABLE not in m.get_id() %}
+                    <tr>
+                        <td><a href="{{ m.get_link() }}">{{ m.get_id() }}</a></td>
+                        <td><a href="{{ m.get_link() }}">{{ m.get_name() }}</a></td>
+                        <td>
+                            <div onclick="display_preview('{{ m.get_id() }}'); loadPage('{{ m.get_id().replace('.','_') }}', '{{ m.get_link() }}')" class="preview_button">Preview</div>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% for m in mitre_element %}
+            {% if CONROL_VARIABLE not in m.get_id() %}
+                <div id="{{ m.get_id() }}" class="div_preview">
+                    <iframe id="mitre_preview" src="about:blank" class="preview {{ m.get_id().replace('.','_') }}"></iframe>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+    </div>
+
+{% endif %}
+
+{# Page to display all mitre framework #}
+{% if showTot %}
+    <input type="text" id="searchbar" onkeydown="return event.key !== 'Enter'" onkeyup="searchCategory(this, 'container')" placeholder="Search category">
+    <div id="container">
+        <table id="outer_global_table">
+            <tr>
+                {% for mitre_tree in mitre_trees %}                 {# list of trees #}
+                    {% set tactic = mitre_tree.get_node(mitre_tree.root).data %}
+                    <td>
+                        <table class="global_table">
+                            <tr> <!-- style="width: max-content" -->
+                                <td class="tactic_cell">
+                                    <a class="tactic_link" href="{{ tactic.get_link() }}"
+                                       title="{{ tactic.get_id() }}"> {{ tactic.get_name() }} </a>
+                                </td>
+                            </tr>
+                            {% for technique_node in mitre_tree.children(mitre_tree.root) %}
+                                {% set technique = technique_node.data %}
+                                {# Mitre element #}
+                                {% set sub_techniques = mitre_tree.children(technique_node.identifier) %}
+                                {# List of nodes #}
+                                <tr class="technique_row">
+                                    <td>
+                                        <a class="technique_link" href="{{ technique.get_link() }}"
+                                           title="{{ technique.get_id() }}">{{ technique.get_name() }}</a>
+
+
+                                        {% if sub_techniques | length != 0 %}
+                                            <div class="left_arrow"
+                                                 onclick="showDiv('{{ tactic.get_id() + '.' + technique.get_id() }}')">
+                                                &#9654
+                                            </div>
+
+                                            <br>
+                                            <table id="{{ tactic.get_id() + '.' + technique.get_id() }}"
+                                                   class="sub_technique_table">
+                                                {% for subt_node in  sub_techniques %}
+                                                    {% set t_sub_t = mitre_tree.get_node(subt_node.identifier).data %}
+                                                    <tr>
+                                                        <td>
+                                                            <a class="sub_technique_link"
+                                                               href="{{ t_sub_t.get_link() }}"
+                                                               title="{{ t_sub_t.get_id() }}">{{ t_sub_t.get_name() }}</a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+{% endif %}
+
+</body>
+</html>

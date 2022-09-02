@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='ModifyAlerts.css') }}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<script>
+    function enable(ref, class_name){
+        let elems = document.querySelectorAll('input.' + class_name);
+        for(let e of elems)
+            e.disabled = ref.checked !== true;
+    }
+
+    function searchItem(){
+        let searchers = document.querySelectorAll('.searchbar');        // Get all input fields
+        let rows = document.querySelectorAll('tbody tr');               // Select all rows of the table body
+
+        let searchSomething = false;                                    // Flag checking empty inputs
+        for(let searchbar of searchers)
+            searchSomething |= searchbar.value !== '';
+
+        if(!searchSomething) {                                          // Nothing to search
+            for (let r of rows)
+                r.style.display = 'table-row';
+        }else{
+            for(let r of rows){                                         // For every row
+                let showRow = true;                                     // Assume there is what searched
+                for(let s of searchers){
+                    let cell = r.querySelector('.' + s.name)            // Select a specific cell
+                    if(s.value !== ''){
+                        let elem = cell.querySelector('input');                             // Could be null
+                        if(elem)
+                            showRow &= isContainedInsensitive(elem.value, s.value);     // Cell with input tag
+                        else
+                            showRow &= isContainedInsensitive(cell.innerText, s.value);     // Cell with plain text
+                    }
+                }
+                if(showRow)
+                    r.style.display = 'table-row';
+                else
+                    r.style.display = 'none';
+            }
+        }
+    }
+
+    function isContainedInsensitive(container, contained){
+        if(container != null && contained != null)
+            return container.toLowerCase().includes(contained.toLowerCase())
+        else
+            return false;
+    }
+</script>
+<body>
+
+<div class="title">
+    <h2>{{ title }}</h2>
+</div>
+<div class="tab">
+    <form action="/" id="goHome" method="post">
+        <button id="goHome" value="HOME" class="tablinks">HOME</button>
+    </form>
+</div>
+
+<div id="add_alert">
+    <form action="/ModifyAlerts" method="POST">
+        <input type="submit" name="add" value="Add">
+        <input type="reset" value="Reset">
+        <br>
+        <input type="text" name="id" placeholder="ID" required>
+        <input type="number" name="tool" class="tool" placeholder="Number of tool" required>
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="number" name="miss_num" id="new_alert_miss_num" placeholder="Number missed of requires" min="1" value="1">
+    </form>
+</div>
+
+{% if alerts %}
+{#    ON DELETE is not set as "ON CASCADE" in mitrettp database #}
+{#    <div class="warning">#}
+{#        WARNING! Delete an alert ID will delete all the rules associated to that alert.#}
+{#    </div>#}
+    <div id="all_alerts">
+        <form action="/ModifyAlerts" method="POST">
+            <input type="submit" name="delete" value="Delete">
+            <input type="submit" name="modify" value="Modify">
+            <input type="reset" value="Reset">
+
+            {% if errors %}
+            <div class="error">
+                Some errors occured: <br>
+                {% if '1451' in errors and '23000' in errors %}
+                    <b>Delete alerts matched with some categories is not allowed</b> <br>
+                {% endif %}
+                {{ errors }}
+            </div>
+            {% endif %}
+            <table>
+                <thead>
+                <tr>
+                    <th>
+                        <input type="text" class="searchbar" placeholder="ID" name="ID" onkeydown="return event.key !== 'Enter'" onkeyup="searchItem()">
+                    </th>
+                    <th>
+                        <input type="text" class="searchbar" placeholder="CURRENT TOOL" name="CURRENT_TOOL" onkeydown="return event.key !== 'Enter'" onkeyup="searchItem()">
+                    </th>
+                    <th>
+                        <input type="text" class="searchbar" placeholder="CHANGE TOOL" name="CHANGE_TOOL" onkeydown="return event.key !== 'Enter'" onkeyup="searchItem()">
+                    </th>
+                    <th>
+                        <input type="text" class="searchbar" placeholder="DESCRIPTION" name="DESCRIPTION" onkeydown="return event.key !== 'Enter'" onkeyup="searchItem()">
+                    </th>
+                    <th>
+                        <input type="text" class="searchbar" placeholder="MISS NUM" name="MISS_NUM" onkeydown="return event.key !== 'Enter'" onkeyup="searchItem()">
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for alert in alerts %}
+                    <tr>
+                        <td class="ID">
+                            <input type="checkbox" id="{{ alert.get_id() }}" name="alert_id"
+                                   value="{{ alert.get_id() }}" onclick="enable(this, '{{ alert.get_id() | sanitize() }}')">
+                            <label for="{{ alert.get_id() }}">{{ alert.get_id() }}</label>
+                        </td>
+                        <td class="tool_data CURRENT_TOOL">
+                            <label for="{{ alert.get_id() }}">
+                                {% if alert.get_tool().get_type().lower() == "siem" %}
+                                    <span title="{{ alert.get_tool().get_id() }}">Siem</span>
+                                {% else %}
+                                    {{ alert.get_tool().get_name() }}
+                                {% endif %}
+                            </label>
+                        </td>
+                        <td class="tool_data CHANGE_TOOL">
+                            <input type="number" class="{{ alert.get_id() | sanitize() }}" name="{{ alert.get_id() }}.new_number"
+                                   value="{{ alert.get_tool().get_id() }}" disabled required>
+                        </td>
+                        <td class="description DESCRIPTION">
+                            <input type="text" class="{{ alert.get_id() | sanitize() }}" name="{{ alert.get_id() }}.new_description"
+                                   value="{{ alert.get_description() }}" title="{{ alert.get_description() }}" disabled>
+                        </td>
+                        <td class="miss_num_data MISS_NUM">
+                            {% if alert.get_miss_num() == 0 %}
+                                Matched
+                            {% else %}
+                                <label for="{{ alert.get_id() }}">{{ alert.get_miss_num() }}</label>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </form>
+    </div>
+{% endif %}
+</body>
+</html>

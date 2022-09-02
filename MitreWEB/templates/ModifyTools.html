@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tools</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='ModifyRules.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='ModifyTools.css') }}">
+
+
+    <script>
+        function allow(id) {
+            const elem = document.getElementById(id);
+            elem.disabled = elem.disabled === false;
+        }
+    </script>
+</head>
+<body>
+
+<div class="title">
+    <h2>TOOLS</h2>
+</div>
+<div class="tab">
+    <form action="/" id="goHome" method="post">
+        <input type="submit" id="goHome" value="HOME" class="tablinks">
+    </form>
+</div>
+
+{# ADD TOOL #}
+<div id="add_tools">
+    <form action="/ModifyTools" method="post" autocomplete="off">
+        <input type="submit" name="add" class="control" value="Add">
+        <input type="reset" class="control normal" value="Reset">
+        <br>
+        <input type="number" placeholder="Tool ID" name="add_tool" required>
+        <input type="text" placeholder="Tool name" name="add_tool" required>
+        <input type="text" placeholder="Tool type" name="add_tool" class="normal" required>
+    </form>
+    {% if insert_error %}
+        <div class="error">
+            {{ insert_error }}
+        </div>
+    {% endif %}
+</div>
+
+{# MODIFY TOOLS #}
+{% if tools %}
+    <div id="remove_tools">
+        <p class="warning">
+            WARNING - Deleting a tool will delete all associated rules
+        </p>
+        {% if delete_error %}
+            <div id="error">
+                {{ delete_error }}
+            </div>
+        {% endif %}
+        {% if modify_error %}
+            <div id="error">
+                {{ modify_error }}
+            </div>
+        {% endif %}
+        <form action="ModifyTools" method="post">
+            <input type="submit" name="modify" class="control" value="Modify">
+            <input type="submit" name="delete" class="control" value="Delete">
+            <input type="reset" class="control normal" value="Reset">
+            <br>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Rename Tool</th>
+                    <th>Change Type</th>
+                </tr>
+                {% for tool in tools %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" id="{{ tool.get_id() }}" name="tools_to_remove" value="{{ tool.get_id() }}"
+                                   onclick="allow('name_{{ tool.get_id() }}'); allow('type_{{ tool.get_id() }}');  ">
+                            <label for="{{ tool.get_id() }}">{{ tool.get_id() }}</label>
+                        </td>
+                        <td>
+                            <label for="{{ tool.get_id() }}">{{ tool.get_name() }}</label>
+                        </td>
+                        <td>
+                            <label for="{{ tool.get_id() }}">{{ tool.get_type() }}</label>
+                        </td>
+                        <td>
+                            <input type="text" id="name_{{ tool.get_id() }}" name="new_name_for_{{ tool.get_id() }}"
+                                   placeholder="New name" value="{{ tool.get_name() }}" disabled>
+                        </td>
+                        <td>
+                            <input type="text" id="type_{{ tool.get_id() }}" name="new_type_for_{{ tool.get_id() }}"
+                                   placeholder="New type" value="{{ tool.get_type() }}" disabled>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </form>
+    </div>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta CHARSET="UTF-8">
+<meta name="viewport">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='Home.css') }}">
+<script>
+    function pleaseWait(){
+        document.getElementById("pleaseWait").style.display = "block"
+    }
+</script>
+<head>
+    <title>MITRE ATT & CK</title>
+</head>
+<body>
+
+<div class="title"><h2>MITRE ATT&amp;CK MANAGER</h2></div>
+
+<div class="tab">
+    <form action="/" method="post">
+        <input type="submit" name="choise" value="Display categories" class="tablinks"/>
+        <input type="submit" name="choise" value="Modify alerts" class="tablinks">
+        <input type="submit" name="choise" value="Modify rules" class="tablinks">
+        <input type="submit" name="choise" value="Modify tools" class="tablinks">
+        <input type="submit" name="choise" value="Update categories" class="tablinks" onclick="pleaseWait()">
+    </form>
+</div>
+<div id="pleaseWait">
+    Please wait until all Mitre categories in database are updated. It will take 1 minute
+</div>
+{% if message %}
+    <p class="{% if errors %} message_with_errors {% else %} message_no_errors {% endif %}">{{ message }}</p>
+{% endif %}
+{% if errors %}
+    <div class = "log_errors">
+    <h4>There are some warnings/errors:</h4>
+
+    {% set nsp = namespace(warning = False) %}
+     <div id="other_errors" style="display: block">
+    {% for line in errors.splitlines() %}
+        {% if "duplicate entry" not in line.lower() %}
+            <p>{{ line }}</p>
+            {% set nsp.warning = True %}
+        {% endif %}
+    {% endfor %}
+     </div>
+    {% if not nsp.warning %}
+        <script>document.getElementById('other_errors').style.display = 'none'</script>
+        <p id="duplicate_warnings">All warnings were about duplicate keys. No action needed</p>
+    {% endif %}
+    </div>
+{% endif %}
+</body>
+</html>

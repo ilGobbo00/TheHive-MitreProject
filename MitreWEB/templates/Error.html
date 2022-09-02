@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='Home.css') }}">
+    <meta charset="UTF-8">
+    <title>Error Page :(</title>
+</head>
+<body>
+
+    <div class="title"><h2>OPS!</h2></div>
+    <div class="tab">
+    <form action="/" method="post">
+        <input type="submit" id="goHomeError" value="HOME" class="tablinks">
+    </form>
+    </div>
+
+    <div id="error">
+        Sorry, an error occurred. {{ info }}
+    </div>
+
+
+
+</body>
+</html>

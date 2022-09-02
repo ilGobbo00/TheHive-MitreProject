@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='ModifyRules.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='MitreCategories.css') }}">
+    <script src="{{ url_for('static', filename='WebGUIScripts.js') }}"></script>
+    <title>{{ title }}</title>
+</head>
+<body>
+<div class="title">
+    <h2>{{ title }}</h2>
+</div>
+<div class="tab">
+    <form action="/" id="goHome" method="post">
+        <input type="submit" id="goHome" value="HOME" class="tablinks">
+    </form>
+</div>
+
+
+{#<form action="/" id="goHome" method="post">#}
+{#    <button id="goHome" value="HOME">HOME</button>#}
+{#</form>#}
+
+{# DIV ERROR #}
+{% if rules != None %}
+    {% if error_miss %}
+        <div id="error">
+            {{ error_miss }}
+        </div>
+    {% endif %}
+
+    <div id="wrapper_missing_rules">
+        <form action="/ModifyRules" method="post">
+
+            <h3 id="alerts_title">ALERTS</h3>
+            <p id="miss_rule_description"><i>Select alerts and those categories which selected alerts will be matched
+                to.</i></p>
+
+            <div id="controls">
+                <input class="normal" type="submit" name="add" value="Add">
+                <input class="normal" type="reset" id="resetRules" value="Reset"><br>
+
+
+                {# Filter for the tools #}
+                <div id="alert_filter">
+                    <div class="dropdown_alert">
+                        <input type="button" class="dropbtn" value="Filter rule">
+                        <div class="dropdown-content">
+                            <div><input type="checkbox" id="All" onclick="all_filter(this, 'add_rules_table')" checked><label for="All">All</label></div>
+                            {% for tool in tools %}
+                                <div class="filter_elem">
+                                    <input type="checkbox" id="{{ tool.get_name() }}" onclick="add_filter_for(this, 'add_rules_table')" checked disabled>                                      {# SAME LABEL OF <tr> IN add_rules_table TO MAKE javascript FUNCTION WORKING #}
+                                    <label for="{{ tool.get_name() }}" title="{{ tool.get_id() }}">{% if "siem" not in tool.get_type().lower() %}{{ tool.get_name() }}{% else %} Siem {% endif %}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="download_alert" onclick="downloadAlert('add_rules_table')">Download alert status</button>
+                <input type="text"  id="searchbar_alert" class="searchbar" placeholder="Search" onkeydown="return event.key !== 'Enter'" onkeyup="searchAlert(this, 'add_rules_table')">
+                <input type="text"  id="searchbar_mitre" placeholder="Search" onkeydown="return event.key !== 'Enter'" onkeyup="searchCategory(this, 'outer_global_table')">
+            </div>
+            <br>
+            <br>
+            {# Table with all rules #}
+            <div id="alerts">
+                <div id="add_rules" class="container">
+                    <table id="add_rules_table">
+                        <thead>
+                            <tr class="thead">
+                                <th>
+                                    TOOL
+                                </th>
+                                <th>
+                                    ID
+                                </th>
+                                <th>
+                                    DESCRIPTION
+                                </th>
+                                <th>
+                                    MISS NUM
+                                </th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                            {% set tbl = namespace(showSeparator = True, row_color = 7) %}                              {# Bool to create the line that separates rules to match and matched rules #}
+                            {% for alert in alerts %}
+                                {% set id = alert.get_id() %}
+                                {% set description = alert.get_description() %}
+
+                                {% if alert.get_miss_num() < 1 and tbl.showSeparator  %}                                {# if rules without a match are ended #}
+                                    {% set tbl.showSeparator = False %}                                                 {# Display separator once #}
+                                    <tr>
+                                    <td class="separator" colspan="4">
+                                        <h5>ALERTS ALTREADY MATCHED</h5>
+                                    </td>
+                                    </tr>
+                                {% endif %}
+                                <tr class="{{ alert.get_tool().get_name() }} color{{ tbl.row_color }}">                                         {# Fake class for filter with javascript  #}
+                                    <td class="tool">
+                                        <input id="add_{{ id }}" type="checkbox" name="rules" value="{{ id }}">&nbsp;                           {# input #}
+                                        <label for="add_{{ id }}">
+                                            {% if "siem" not in alert.get_tool().get_type().lower() %}{{ alert.get_tool().get_name() }}{% else %} Siem {% endif %}      {# tool name #}
+                                        </label>
+                                    </td>
+                                    <td {% if not description %}colspan="2"{% endif %}>
+                                        <label for="add_{{ id }}">{{ id }}</label>                                                              {# alert id #}
+                                    </td>
+                                    {% if description %}
+                                        <td>
+                                            <label for="add_{{ id }}">{{ description }}</label>                                                 {# alert description if any #}
+                                        </td>
+                                    {% endif %}
+                                    <td class="miss_num">
+                                        {% if alert.get_miss_num() < 1  %}
+                                            -
+                                        {% else %}
+                                            {{ alert.get_miss_num() }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if tbl.row_color == 7 %}
+                                    {% set tbl.row_color = 8 %}
+                                {% else %}
+                                    {% set tbl.row_color = 7 %}
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {#  MITRE TABLE #}
+            <div id="container" {% if error %} style="margin-top:2.25%" {% endif %}>
+
+                <div id="goUp"><a href="#">↑</a></div>
+
+                <table id="outer_global_table">
+                    <tr>
+                        {% for mitre_tree in mitre_trees %}                 {# list of trees #}
+                            {% set tactic = mitre_tree.get_node(mitre_tree.root).data %}
+                            <td>
+                                <table class="global_table" style="display: inline-table;">
+                                    <tr>
+                                        {# Tatic #}
+                                        <td class="tactic_cell">
+                                            <input type="checkbox" name="categories_to_add" id="{{ tactic.get_id() }}.root"
+                                                   value="{{ tactic.get_id() }}.root" onclick="checkSubInput(this)">
+                                            <label for="{{ tactic.get_id() }}.root">
+                                                <a class="tactic_link"
+                                                   title="{{ tactic.get_id() }}"> {{ tactic.get_name() }} </a>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    {% for technique_node in mitre_tree.children(mitre_tree.root) %}
+                                        {% set technique = technique_node.data %}                                       {# Mitre element #}
+                                        {% set sub_techniques = mitre_tree.children(technique_node.identifier) %}            {# List of nodes #}
+                                        <tr class="technique_row">
+                                            <td>
+                                                <input type="checkbox" id="{{ tactic.get_id() }}.{{ technique.get_id() }}{% if sub_techniques | length != 0 %}.xxx{% endif %}"
+                                                       name="categories_to_add" value="{{ tactic.get_id() }}.{{ technique.get_id() }}{% if sub_techniques | length != 0 %}.xxx" {# onclick="checkSubInput(this)" #} {% else %}" {% endif %}>
+                                                <label for="{{ tactic.get_id() }}.{{ technique.get_id() }}{% if sub_techniques | length != 0 %}.xxx{% endif %}">
+                                                    <a class="technique_link"
+                                                       title="{{ technique.get_id() }}">{{ technique.get_name() }}</a>
+                                                </label>
+
+                                                {% if sub_techniques | length != 0 %}
+                                                    <div class="left_arrow"
+                                                         onclick="showDiv('{{ tactic.get_id() + '.' + technique.get_id() }}')">
+                                                        &#9654
+                                                    </div>
+
+                                                    <br>
+                                                    <table id="{{ tactic.get_id() + '.' + technique.get_id() }}"
+                                                           class="sub_technique_table" style="display: none;">
+                                                        {% for subt_node in  sub_techniques %}
+                                                            {% set t_sub_t = mitre_tree.get_node(subt_node.identifier).data %}
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" id="{{ tactic.get_id() }}.{{ t_sub_t.get_id() }}"
+                                                                           name="categories_to_add"
+                                                                           value="{{ tactic.get_id() }}.{{ t_sub_t.get_id() }}">
+                                                                    <label for="{{ tactic.get_id() }}.{{ t_sub_t.get_id() }}">
+                                                                        <a class="sub_technique_link"
+                                                                           title="{{ t_sub_t.get_id() }}">{{ t_sub_t.get_name() }}</a>
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+{% else %}
+    <div id="nothingToShow">Nessuna regola senza alcuna associazione</div>
+{% endif %}
+
+{# TABLE WITH MATCHED RULES #}
+{% if matched_rules %}
+    <hr class="rounded">
+    {% if error_match %}
+        <div id="error">
+            {{ error_match }}
+        </div>
+    {% endif %}
+    <h3 id="rules_title">MATCHED RULES</h3>
+    <p id="matched_rules_description"><i>Select elements which have to be deleted</i></p>
+    <div id="wrapper_matched_rules">
+        <form action="/ModifyRules" method="post">
+            <input class="normal" type="submit" name="delete" value="Delete">
+            <input class="normal" type="reset" id="resetRules" value="Reset" onclick="resInput(this)">
+            <br>
+            <br>
+
+{#          Biggest id possible: 'ASC.7.TA0010.T1048.002'
+            Smallest id possible: 'ASC.7'#}
+
+            {% set tbl = namespace(new_ta_row = False, new_t_row = False, t_st_color = 1, ta_color = 3, a_color = 5, prefix="m_") %}
+
+            <div id="controls_matched">
+                {# Button to filter tools #}
+                <div id="matched_filter">
+                    <div class="dropdown_matched">
+                        <input type="button" class="matched_dropbtn" value="Filter rule">
+                        <div class="dropdown-content_matched">
+                            <div>
+                                <input type="checkbox" id="m_All" onclick="all_filter(this, 'matched_rules_table')" checked>
+                                <label for="m_All">All</label>
+                            </div>
+                            {% for tool in tools %}
+                                <div>
+                                    <input type="checkbox" id="{{ tbl.prefix }}{{ tool.get_name() }}" onclick="add_filter_for(this, 'matched_rules_table')" checked disabled> {# SAME LABEL OF <tr> IN add_rules_table TO MAKE javascript FUNCTION WORKING #}
+                                    <label for="{{ tbl.prefix }}{{ tool.get_name() }}" title="{{ tool.get_id() }}">{% if "siem" not in tool.get_type().lower() %}{{ tool.get_name() }}{% else %} Siem {% endif %}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Button to dowload matched_rules_table csv #}
+{#                <div>#}
+                    <button type="button" id="download_rules" onclick="downloadRules('matched_rules_table')">Download rules</button>
+{#                </div>#}
+
+                {# Search box for matched_rule_table #}
+{#                <div id="search_category_matched">#}
+                    <input type="text" placeholder="Search" onkeydown="return event.key !== 'Enter'" onkeyup="searchCategoryMatched(this, 'matched_rules_table')">
+{#                </div>#}
+            </div>
+
+            {# TABLE WITH MATCH BETWEEN ALERT AND MITRE CATEGORIES #}
+            <div id="matched_rules">
+                <table id="matched_rules_table">
+                    <thead>
+                        <tr>
+                            <th>TOOL</th>
+                            <th>ALERT</th>
+                            <th>TACTICS</th>
+                            <th>TECHNIQUES</th>
+                            <th>SUB TECHNIQUES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert_tree in matched_rules %}                                                                           {# Trees list #}
+                            {% set tbl.new_ta_row = False %}
+                            <tr class="{{ tbl.prefix }}{{ alert_tree.get_node(alert_tree.root).data.get_tool().get_name() }}">          {# From a Tree -> Get Root -> Get Data field (Alert) -> Get Tool -> Get Tool's name #}
+
+                                {# Tool cell #}
+                                {% set tool_name = alert_tree.get_node(alert_tree.root).data.get_tool().get_name() %}                   {# Get tool's name #}
+                                {% set tool_type =  alert_tree.get_node(alert_tree.root).data.get_tool().get_type() %}                  {# Get tool's type #}
+                                <td rowspan="{{ alert_tree.leaves() | length }}" class="color{{ tbl.a_color }}">
+                                    {% if "siem" not in tool_type.lower() %}{{ tool_name }}{% else %}{{ tool_type }}{% endif %}         {# Display tool's name only if it isn't a Siem type tool#}
+                                </td>
+
+                                {# Alert cell #}
+                                <td rowspan="{{ alert_tree.leaves() | length }}"                                                        {# Get the sum of all elements which create a row #}
+                                    class="color{{ tbl.a_color }}">
+                                    <input type="checkbox" id="{{ alert_tree.root }}" name="alert_to_remove" value="{{ alert_tree.root }}" onclick="childrenAction(this, '{{ alert_tree.root }}')">
+                                    <label for="{{ alert_tree.root }}">
+                                        {{ alert_tree.get_node(alert_tree.root).data.get_id() }}                                        {# Get name of the alert (data of tree's root) #}
+                                    </label>
+                                </td>
+
+                                {% for ta in alert_tree.children(alert_tree.root) %}                                                    {# Get all children of the root #}
+                                    {% if tbl.new_ta_row %}
+                                        <tr class="{{ tbl.prefix }}{{ alert_tree.get_node(alert_tree.root).data.get_tool().get_name() }}">
+                                    {% endif %}
+
+                                    {% set tbl.new_t_row = False %}
+                                    {# Tatic cell #}
+                                    <td rowspan="{{ alert_tree.leaves(ta.identifier) | length }}"
+                                        class="color{{ tbl.ta_color }}">
+                                        <input type="checkbox" id="{{ ta.identifier }}" name="categories_to_remove" value="{{ ta.identifier }}.xxx" onclick="childrenAction(this, '{{ ta.identifier }}')">
+                                        <label for="{{ ta.identifier }}" title="{{ ta.data.get_id() }}">{{ ta.data.get_name() }}</label>
+                                    </td>
+
+                                    {% for t in alert_tree.children(ta.identifier) %}                                                   {# For every tactic, get all technique (its children) #}
+
+                                        {% if tbl.new_t_row %}
+                                            <tr class="{{ tbl.prefix }}{{ alert_tree.get_node(alert_tree.root).data.get_tool().get_name() }}">
+                                        {% endif %}
+
+                                        {% set subts = alert_tree.children(t.identifier) %}                                             {# Get immediately the list of the children if any #}
+
+                                        {# Technique cell #}
+                                        <td rowspan="{{ alert_tree.leaves(t.identifier) | length }}"
+                                            class="color{{ tbl.t_st_color }}">
+                                            <input type="checkbox" id="{{ t.identifier }}" name="categories_to_remove" value="{{ t.identifier }}{% if subts | length != 0%}.xxx{% endif %}" onclick="childrenAction(this, '{{ t.identifier }}')">
+                                            <label for="{{ t.identifier }}" title="{{ t.data.get_id() }}">{{ t.data.get_name() }}</label>
+                                        </td>
+
+                                        {% if subts | length == 0 %}                                                                    {# if the technique doesn't have sub-technique (children)  #}
+                                            {# Empty cell if technique with no sub-techniques #}
+                                            <td class="color{{ tbl.t_st_color }}"></td>                                                 {# Empty cell needed for background color #}
+                                            </tr>
+                                        {% else %}
+                                            {% set temp_s =  subts.pop(0)%}
+                                            {# First sub-technique cell #}
+                                            <td class="color{{ tbl.t_st_color }}">
+                                                <input type="checkbox" id="{{ temp_s.identifier }}" name="categories_to_remove" value="{{ temp_s.identifier }}">
+                                                <label for="{{ temp_s.identifier }}" title="{{ temp_s.data.get_id() }}">{{ temp_s.data.get_name() }} </label>           {# else insert last cell of the row #}
+                                            </td>
+                                            </tr>
+                                            {% for s in subts %}                                                                        {# and create as many row as meny remaining sub_techniques #}
+                                                <tr class="{{ tbl.prefix }}{{ alert_tree.get_node(alert_tree.root).data.get_tool().get_name() }}">
+                                                    {# Other sub-technique cells #}
+                                                    <td class="color{{ tbl.t_st_color }}">
+                                                        <input type="checkbox" id="{{ s.identifier }}" name="categories_to_remove" value="{{ s.identifier }}">
+                                                        <label for="{{ s.identifier }}" title="{{ s.data.get_id() }}">{{ s.data.get_name() }}</label>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% endif %}
+
+                                        {# Manage color of technique and sub_technique cells #}
+                                        {% if tbl.t_st_color == 1 %}
+                                            {% set tbl.t_st_color = 2 %}
+                                        {% else %}
+                                            {% set tbl.t_st_color = 1 %}
+                                        {% endif %}
+
+                                        {% set tbl.new_t_row = True %}
+                                    {% endfor %}
+
+                                    {# Manage color of tactics cells #}
+                                    {% if tbl.ta_color == 3 %}
+                                        {% set tbl.ta_color = 4 %}
+                                    {% else %}
+                                        {% set tbl.ta_color = 3 %}
+                                    {% endif %}
+
+                                    {% set tbl.new_ta_row = True %}
+                                {% endfor %}
+
+                            {# Manage color of alert cells #}
+                            {% if tbl.a_color == 5 %}
+                                {% set tbl.a_color = 6 %}
+                            {% else %}
+                                {% set tbl.a_color = 5 %}
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+{% endif %}
+</body>
+</html>
