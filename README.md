@@ -11,7 +11,7 @@ There was two requests for this activity:
 There are two folders, one for the database management (classes, utility functions,..), the other for WEB functionalities (api and web interface).
 
 ## Examples
-Inside [Images](/Images) folder there are all the screenshot showing the web interface. More specifically, there are: 
+Inside [Images](/Images) folder there are all the screenshot showing the web interface, an example of request-response and the waited results. More specifically, there are: 
 1. [Main page](/Images/Home.png)
 2. [Display all Mitre enterprise framework](/Images/DisplayAllCategories.png) and a [single Mitre category](/Images/DisplayCategories.png)
 3. [Page to create alert-TTP relations](/Images/Alerts_blur2.png)
@@ -20,7 +20,14 @@ Inside [Images](/Images) folder there are all the screenshot showing the web int
 6. [Error main page](/Images/Error.png)
 7. [WebAPI request-response example](/Images/Postman-AV_4_blur.png) with Postman
 8. [The resulting TTP page of a test case](/Images/TheHiveResult.png) (The Hive Project)
+9. [Relations table](/Images/SQL-CustomRule2.png)
 
 ## Documentation
 There isn't a real documentation for this project since it wasn't required from the supervisor. There are comments in every file to explain features and reasonings behind the code. <br> 
 The only [document](Schema%20database%20mitrettp.pdf) written and uploaded here, it's the DB sctructure and its contraints.
+
+## Tools used for this project
+1. MySQL & MySQL Workbench
+2. Python & Flask (Jinjia)
+3. HTML, CSS & Javascript
+4. Pycharm & Git
